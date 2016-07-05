@@ -1,10 +1,12 @@
 <idea-plugin version="2">
     <name>Bytecode Editor</name>
     <id>com.github.pshirshov.bytecodeeditor</id>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
     <description>
         <![CDATA[
-        <p>Provides <i>View | Edit Bytecode</i> action for those who learns JVM internals.
+        <p>Provides <i>View | Edit Bytecode</i> action for those who learns JVM internals.</p>
+
+        <p>
         Based on ByteCode Viewer by JetBrains but is better:
         <ul>
             <li>it uses an editor tab instead of popup</li>
@@ -13,16 +15,20 @@
         </ul>
          </p>
 
-        <p>Based on modified Jasper (Java disassembler) and Jasmin (Java assembler).</p>
+        <p>Based on modified ASM6 and Jasmin (Java assembler). ASM renders classes as Jasmin assembly.</p>
 
         <p>It's a very gloomy tool. WIP.</p>
 
         <p>TODO:
             <ul>
-                <li>Error handling. Both Jasmin and Jasper needs to be reworked</li>
-                <li>Generate line number comments during disassembly</li>
+                <li>Better error handling</li>
+                <li>Support for ASM XML representation</li>
+                <li>Support for ASM Textifier representation</li>
+                <li>Support for ASM Textifier representation assembling</li>
                 <li>Resolve problems with editor focusing</li>
-                <li>Krakatau integration</li>
+                <li>Check Jasmin compatibility with recent class file versions and rework it if required</li>
+                <li>Krakatau integration (maybe, I'm not sure)</li>
+                <li>Refactor all that shit!</li>
             </ul>
 
             Patches are welcome...
@@ -30,13 +36,18 @@
 
         ]]>
     </description>
+    <change-notes><![CDATA[
+        <ul>
+            <li><em>0.1.3</em>: Replaced outdated Jasper disassembler with ASM 6</li>
+        </ul>
+    ]]></change-notes>
     <vendor>com.github.pshirshov</vendor>
     <idea-version since-build="141.0"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceInterface="com.github.pshirshov.byteCodeViewer.ByteCodeViewerManager"
                         serviceImplementation="com.github.pshirshov.byteCodeViewer.ByteCodeViewerManager"/>
-        <fileEditorProvider implementation="com.github.pshirshov.byteCodeViewer.EditorProvider" />
+        <fileEditorProvider implementation="com.github.pshirshov.byteCodeViewer.EditorProvider"/>
     </extensions>
 
     <actions>

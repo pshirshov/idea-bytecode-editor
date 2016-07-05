@@ -6,6 +6,7 @@ import com.intellij.ide.structureView.StructureViewBuilder;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -14,8 +15,11 @@ import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
+import jasmin.Main;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +32,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
+    private static final Logger LOG = Logger.getInstance(ByteCodeEditor.class);
+
     private final ByteCodeViewerComponent component;
     private FileEditorState textEditorState = new TextEditorState();
     private VFile file;
@@ -51,17 +57,25 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
 
             @Override
             public void actionPerformed(AnActionEvent anActionEvent) {
-                // TODO: invoke compiler
-                // convert String into InputStream
                 InputStream is = new ByteArrayInputStream(component.myEditor.getDocument().getText().getBytes());
                 final String replace = virtualFile.getPresentableName().replace(".bc", ".class");
-                VirtualFile selection = null;
-                selection = FileChooser.chooseFile(new FileChooserDescriptor(false, true, false, false, false, false), project, null);
+                final FileChooserDescriptor fcd =
+                        new FileChooserDescriptor(false, true, false, false, false, false);
+                VirtualFile selection = FileChooser.chooseFile(fcd, project, null);
                 if (selection!= null) {
                     final String destDir = selection.getPath();
-                    System.err.println("Writing: " + destDir);
 
-                    new jasmin.Main().assemble(is, replace, destDir);
+                    try {
+                        LOG.info("Assembling classfile into "+destDir);
+                        new Main().assemble(is, replace, destDir);
+                    } catch (Throwable e) {
+                        LOG.error("Assembly failed", e);
+                          String message = "Jasmin assembler failed: "+e.getMessage();
+                          JBPopupFactory.getInstance()
+                                        .createHtmlTextBalloonBuilder(message, MessageType.ERROR, null)
+                                        .createBalloon()
+                                        .showInCenterOf(getComponent());
+                    }
                 }
             }
         }};

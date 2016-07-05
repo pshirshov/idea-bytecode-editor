@@ -11,5 +11,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="byteCodeViewer" level="application" />
     <orderEntry type="library" name="jasmin" level="project" />
+    <orderEntry type="library" name="asm-all-6.0_ALPHA" level="project" />
+    <orderEntry type="library" name="asm-all-6.0_ALPHA-repacked" level="project" />
   </component>
 </module>

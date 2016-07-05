@@ -102,14 +102,26 @@ public class ByteCodeViewerComponent extends JPanel implements Disposable {
             lineNumber = mappedLine;
           }
         }
-        offset = bytecode.indexOf("LINENUMBER " + lineNumber);
-        while (offset == -1 && lineNumber < document.getLineCount()) {
-          offset = bytecode.indexOf("LINENUMBER " + (lineNumber++));
+        offset = getOffset(bytecode, document, lineNumber, "LINENUMBER ");
+        if (offset == -1) {
+          offset = getOffset(bytecode, document, lineNumber, ".line ");
         }
+
       }
     }
     setText(bytecode, Math.max(0, offset));
   }
+
+
+  private int getOffset(String bytecode, Document document, int lineNumber, String marker) {
+    int offset;
+    offset = bytecode.indexOf(marker + lineNumber);
+    while (offset == -1 && lineNumber < document.getLineCount()) {
+      offset = bytecode.indexOf(marker + (lineNumber++));
+    }
+    return offset;
+  }
+
 
   public String getText() {
     return myEditor.getDocument().getText();

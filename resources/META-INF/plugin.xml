@@ -1,0 +1,42 @@
+<idea-plugin version="2">
+    <name>Bytecode Editor</name>
+    <id>com.github.pshirshov.bytecodeeditor</id>
+    <version>0.1</version>
+    <description>
+        <![CDATA[
+        <p>Provides <i>View | Edit Bytecode</i> action for those who learns JVM internals.
+        Based on ByteCode Viewer by JetBrains but is better:
+        <ul>
+            <li>it uses an editor tab instead of popup</li>
+            <li>it supports editing bytecode assembler (in Jasmin format) and assembling back into .class files.</li>
+            <li>it provides default hotkey for bytecode analysis: <em>Ctrl+K, Ctrl+B</em></li>
+         </p>
+
+        <p>Based on modified Jasper (Java disassembler) and Jasmin (Java assembler).</p>
+
+        <p>It's a very gloomy tool. WIP.</p>
+        ]]>
+    </description>
+    <vendor>com.github.pshirshov</vendor>
+    <idea-version since-build="141.0"/>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceInterface="com.github.pshirshov.byteCodeViewer.ByteCodeViewerManager"
+                        serviceImplementation="com.github.pshirshov.byteCodeViewer.ByteCodeViewerManager"/>
+        <fileEditorProvider implementation="com.github.pshirshov.byteCodeViewer.EditorProvider" />
+    </extensions>
+
+    <actions>
+        <group>
+            <action id="ByteCodeEditor" class="com.github.pshirshov.byteCodeViewer.ShowByteCodeAction"
+                    text="Edit Bytecode">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl K" second-keystroke="ctrl B"/>
+            </action>
+            <add-to-group group-id="QuickActions" anchor="after" relative-to-action="QuickJavaDoc"/>
+        </group>
+    </actions>
+
+    <depends>com.intellij.modules.java</depends>
+    <depends>ByteCodeViewer</depends>
+
+</idea-plugin>

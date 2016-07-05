@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <name>Bytecode Editor</name>
     <id>com.github.pshirshov.bytecodeeditor</id>
-    <version>0.1</version>
+    <version>0.1.2</version>
     <description>
         <![CDATA[
         <p>Provides <i>View | Edit Bytecode</i> action for those who learns JVM internals.
@@ -10,11 +10,24 @@
             <li>it uses an editor tab instead of popup</li>
             <li>it supports editing bytecode assembler (in Jasmin format) and assembling back into .class files.</li>
             <li>it provides default hotkey for bytecode analysis: <em>Ctrl+K, Ctrl+B</em></li>
+        </ul>
          </p>
 
         <p>Based on modified Jasper (Java disassembler) and Jasmin (Java assembler).</p>
 
         <p>It's a very gloomy tool. WIP.</p>
+
+        <p>TODO:
+            <ul>
+                <li>Error handling. Both Jasmin and Jasper needs to be reworked</li>
+                <li>Generate line number comments during disassembly</li>
+                <li>Resolve problems with editor focusing</li>
+                <li>Krakatau integration</li>
+            </ul>
+
+            Patches are welcome...
+        </p>
+
         ]]>
     </description>
     <vendor>com.github.pshirshov</vendor>

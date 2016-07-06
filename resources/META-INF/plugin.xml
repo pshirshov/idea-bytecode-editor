@@ -45,14 +45,14 @@
     <idea-version since-build="141.0"/>
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceInterface="com.github.pshirshov.byteCodeViewer.ByteCodeViewerManager"
-                        serviceImplementation="com.github.pshirshov.byteCodeViewer.ByteCodeViewerManager"/>
-        <fileEditorProvider implementation="com.github.pshirshov.byteCodeViewer.EditorProvider"/>
+        <projectService serviceInterface="com.github.pshirshov.conversion.BytecodeConverter"
+                        serviceImplementation="com.github.pshirshov.conversion.BytecodeConverter"/>
+        <fileEditorProvider implementation="com.github.pshirshov.EditorProvider"/>
     </extensions>
 
     <actions>
         <group>
-            <action id="ByteCodeEditor" class="com.github.pshirshov.byteCodeViewer.ShowByteCodeAction"
+            <action id="ByteCodeEditor" class="com.github.pshirshov.ShowByteCodeAction"
                     text="Edit Bytecode">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl K" second-keystroke="ctrl B"/>
             </action>

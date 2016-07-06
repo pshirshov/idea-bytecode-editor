@@ -1,4 +1,4 @@
-package com.github.pshirshov.byteCodeViewer; /***
+package com.github.pshirshov.conversion.jasmin; /***
  * ASM: a very small and fast Java bytecode manipulation framework
  * Copyright (c) 2000-2011 INRIA, France Telecom
  * All rights reserved.

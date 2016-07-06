@@ -13,8 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pshirshov.byteCodeViewer;
+package com.github.pshirshov;
 
+import com.github.pshirshov.conversion.BytecodeConverter;
+import com.github.pshirshov.conversion.xml.XmlDisassembleStrategy;
+import com.github.pshirshov.util.BCEVirtualFile;
+import com.github.pshirshov.util.PsiUtils;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.highlighter.JavaClassFileType;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -37,16 +41,11 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiClassOwner;
-import com.intellij.psi.PsiCompiledFile;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.SmartPointerManager;
 import com.intellij.psi.SmartPsiElementPointer;
-import com.intellij.psi.impl.source.tree.injected.InjectedLanguageUtil;
-import com.intellij.psi.util.PsiUtilBase;
 import com.intellij.psi.util.PsiUtilCore;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * @author anna
@@ -54,6 +53,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class ShowByteCodeAction extends AnAction {
     private static final Logger LOG = Logger.getInstance(ShowByteCodeAction.class);
+    private final XmlDisassembleStrategy disassembleStrategy = new XmlDisassembleStrategy();
 
 
     @Override
@@ -62,10 +62,10 @@ public class ShowByteCodeAction extends AnAction {
         e.getPresentation().setIcon(AllIcons.Toolwindows.Documentation);
         final Project project = e.getData(CommonDataKeys.PROJECT);
         if (project != null) {
-            final PsiElement psiElement = getPsiElement(e.getDataContext(), project, e.getData(CommonDataKeys.EDITOR));
+            final PsiElement psiElement = PsiUtils.getPsiElement(e.getDataContext(), project, e.getData(CommonDataKeys.EDITOR));
             if (psiElement != null) {
                 if ((psiElement.getContainingFile() instanceof PsiClassOwner) &&
-                        (ByteCodeViewerManager.getContainingClass(psiElement) != null)) {
+                        (PsiUtils.getContainingClass(psiElement) != null)) {
                     e.getPresentation().setEnabled(true);
                 }
             }
@@ -82,12 +82,12 @@ public class ShowByteCodeAction extends AnAction {
         }
         final Editor editor = e.getData(CommonDataKeys.EDITOR);
 
-        final PsiElement psiElement = getPsiElement(dataContext, project, editor);
+        final PsiElement psiElement = PsiUtils.getPsiElement(dataContext, project, editor);
         if (psiElement == null) {
             return;
         }
 
-        final String psiElementTitle = ByteCodeViewerManager.getTitle(psiElement);
+        final String psiElementTitle = PsiUtils.getTitle(psiElement);
 
         final VirtualFile virtualFile = PsiUtilCore.getVirtualFile(psiElement);
         if (virtualFile == null) {
@@ -113,7 +113,7 @@ public class ShowByteCodeAction extends AnAction {
                     myByteCode = ApplicationManager.getApplication().runReadAction(new Computable<String>() {
                         @Override
                         public String compute() {
-                            return ByteCodeViewerManager.getByteCode(psiElement);
+                            return new BytecodeConverter(disassembleStrategy).getByteCode(psiElement);
                         }
                     });
                 }
@@ -141,28 +141,31 @@ public class ShowByteCodeAction extends AnAction {
                     return;
                 }
 
-                PsiClass psiClass = ByteCodeViewerManager.getContainingClass(psiElement);
+                PsiClass psiClass = PsiUtils.getContainingClass(psiElement);
 
                 FileEditorManager manager = FileEditorManager.getInstance(project);
 
                 final String filename = '/' + psiClass.getQualifiedName().replace('.', '/') + ".bc";
-                VFile vFile = new VFile(
+                BCEVirtualFile BCEVirtualFile = new BCEVirtualFile(
                         filename
                         , JavaClassFileType.INSTANCE
-                        , myByteCode.getBytes(), psiElement);
+                        , myByteCode.getBytes()
+                        , psiElement
+                        , disassembleStrategy
+                );
 
                 for (FileEditor fileEditor : FileEditorManager.getInstance(project).getAllEditors()) {
                     if (fileEditor instanceof ByteCodeEditor) {
                         final ByteCodeEditor asBce = (ByteCodeEditor) fileEditor;
-                        if (asBce.getFile().getPath().equals(vFile.getPath())) {
+                        if (asBce.getFile().getPath().equals(BCEVirtualFile.getPath())) {
                             FileEditorManager.getInstance(project).openFile(asBce.getFile(), true, true);
-                            asBce.update(vFile);
+                            asBce.update(BCEVirtualFile);
                             return;
                         }
                     }
                 }
 
-                manager.openFile(vFile, true, true);
+                manager.openFile(BCEVirtualFile, true, true);
 
             }
         });
@@ -175,34 +178,5 @@ public class ShowByteCodeAction extends AnAction {
     }
 
 
-    @Nullable
-    private static PsiElement getPsiElement(DataContext dataContext, Project project, Editor editor) {
-        PsiElement psiElement = null;
-        if (editor == null) {
-            psiElement = (PsiElement) dataContext.getData(CommonDataKeys.PSI_ELEMENT.getName());
-        } else {
-            final PsiFile file = PsiUtilBase.getPsiFileInEditor(editor, project);
-            final Editor injectedEditor = InjectedLanguageUtil.getEditorForInjectedLanguageNoCommit(editor, file);
-            if (injectedEditor != null) {
-                psiElement = findElementInFile(PsiUtilBase.getPsiFileInEditor(injectedEditor, project), injectedEditor);
-            }
 
-            if (file != null && psiElement == null) {
-                psiElement = findElementInFile(file, editor);
-            }
-        }
-
-        return psiElement;
-    }
-
-
-    private static PsiElement findElementInFile(@Nullable PsiFile psiFile, Editor editor) {
-        if (psiFile == null) {
-            return null;
-        }
-        if (psiFile instanceof PsiCompiledFile) {
-            psiFile = ((PsiCompiledFile) psiFile).getDecompiledPsiFile();
-        }
-        return psiFile.findElementAt(editor.getCaretModel().getOffset());
-    }
 }

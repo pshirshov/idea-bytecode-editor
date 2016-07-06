@@ -1,0 +1,281 @@
+package com.github.pshirshov;
+
+import com.github.pshirshov.util.BCEVirtualFile;
+import com.intellij.codeHighlighting.BackgroundEditorHighlighter;
+import com.intellij.execution.filters.LineNumbersMapping;
+import com.intellij.ide.structureView.StructureViewBuilder;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionPlaces;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.EditorSettings;
+import com.intellij.openapi.editor.ScrollType;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
+import com.intellij.openapi.editor.impl.EditorFactoryImpl;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.FileEditorLocation;
+import com.intellij.openapi.fileEditor.FileEditorState;
+import com.intellij.openapi.fileEditor.FileEditorStateLevel;
+import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
+import com.intellij.openapi.fileTypes.StdFileTypes;
+import com.intellij.openapi.fileTypes.SyntaxHighlighter;
+import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.UserDataHolderBase;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiUtilCore;
+import com.intellij.util.DocumentUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import javax.swing.*;
+import java.awt.*;
+import java.beans.PropertyChangeListener;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
+    private static final Logger LOG = Logger.getInstance(ByteCodeEditor.class);
+
+    private final JPanel component;
+    private FileEditorState textEditorState = new TextEditorState();
+    private BCEVirtualFile file;
+    private final Editor editor;
+
+
+    public String getText() {
+        return editor.getDocument().getText();
+    }
+
+
+    public BCEVirtualFile getFile() {
+        return file;
+    }
+
+
+    public ByteCodeEditor(Project project, BCEVirtualFile virtualFile) {
+        AnAction[] additionalActions = new AnAction[]{new AssembleAction(this, project, virtualFile)};
+
+        final JPanel panel = new JPanel(new BorderLayout());
+
+        final EditorFactory factory = EditorFactory.getInstance();
+        final Document doc = ((EditorFactoryImpl) factory).createDocument("", true, false);
+        doc.setReadOnly(false);
+
+        editor = factory.createEditor(doc, project);
+        final EditorEx editorEx = (EditorEx) editor;
+
+        EditorHighlighterFactory editorHighlighterFactory = EditorHighlighterFactory.getInstance();
+        final SyntaxHighlighter syntaxHighlighter = SyntaxHighlighterFactory
+                .getSyntaxHighlighter(StdFileTypes.XML, project, null);
+        editorEx.setHighlighter(editorHighlighterFactory.createEditorHighlighter(syntaxHighlighter,
+                                                                                 EditorColorsManager.getInstance()
+                                                                                                    .getGlobalScheme()));
+        editorEx.setCaretVisible(true);
+        editorEx.setViewer(false);
+        editorEx.setInsertMode(true);
+
+        final EditorSettings settings = editor.getSettings();
+        settings.setLineMarkerAreaShown(true);
+        settings.setIndentGuidesShown(true);
+        settings.setLineNumbersShown(true);
+        settings.setFoldingOutlineShown(true);
+
+        editor.setBorder(null);
+        panel.add(editor.getComponent(), BorderLayout.CENTER);
+
+        final ActionManager actionManager = ActionManager.getInstance();
+        final DefaultActionGroup actions = new DefaultActionGroup();
+        for (final AnAction action : additionalActions) {
+            actions.add(action);
+        }
+        panel.add(actionManager.createActionToolbar(ActionPlaces.JAVADOC_TOOLBAR, actions, true).getComponent(),
+                  BorderLayout.NORTH);
+
+        this.component = panel;
+        this.file = virtualFile;
+        updateEditor(virtualFile);
+    }
+
+
+    private void updateEditor(BCEVirtualFile virtualFile) {
+        try {
+            try (
+                    BufferedInputStream bis = new BufferedInputStream(virtualFile.getInputStream());
+                    ByteArrayOutputStream buf = new ByteArrayOutputStream();
+            ) {
+                int result = bis.read();
+                while (result != -1) {
+                    buf.write((byte) result);
+                    result = bis.read();
+                }
+                setText(buf.toString(), virtualFile.getElement());
+            }
+            ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        file.setBinaryContent(virtualFile.getContent());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    file.setElement(virtualFile.getElement());
+                }
+            });
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public void setText(final String bytecode, PsiElement element) {
+        int offset = 0;
+        VirtualFile file = PsiUtilCore.getVirtualFile(element);
+        if (file != null) {
+            final Document document = FileDocumentManager.getInstance().getDocument(file);
+            if (document != null) {
+                int lineNumber = document.getLineNumber(element.getTextOffset());
+                LineNumbersMapping mapping = file.getUserData(LineNumbersMapping.LINE_NUMBERS_MAPPING_KEY);
+                if (mapping != null) {
+                    int mappedLine = mapping.sourceToBytecode(lineNumber);
+                    while (mappedLine == -1 && lineNumber < document.getLineCount()) {
+                        mappedLine = mapping.sourceToBytecode(++lineNumber);
+                    }
+                    if (mappedLine > 0) {
+                        lineNumber = mappedLine;
+                    }
+                }
+                offset = this.file.getStrategy().getLineOffset(bytecode, document, lineNumber);
+            }
+        }
+        setText(bytecode, Math.max(0, offset));
+    }
+
+
+    private void setText(final String bytecode, final int offset) {
+        DocumentUtil.writeInRunUndoTransparentAction(() -> {
+            Document fragmentDoc = editor.getDocument();
+            fragmentDoc.replaceString(0, fragmentDoc.getTextLength(), bytecode);
+            editor.getCaretModel().moveToOffset(offset);
+            editor.getScrollingModel().scrollToCaret(ScrollType.RELATIVE);
+
+            //myEditor.getCaretModel().addCaret(myEditor.getCaretModel().getVisualPosition());
+            editor.getComponent().requestFocus();
+        });
+    }
+
+
+    @NotNull
+    @Override
+    public JComponent getComponent() {
+        return component;
+    }
+
+
+    @Nullable
+    @Override
+    public JComponent getPreferredFocusedComponent() {
+        return component;
+    }
+
+
+    @NotNull
+    @Override
+    public String getName() {
+        return file.getPresentableName();
+    }
+
+
+    @NotNull
+    @Override
+    public FileEditorState getState(@NotNull FileEditorStateLevel fileEditorStateLevel) {
+        return textEditorState;
+    }
+
+
+    @Override
+    public void setState(@NotNull FileEditorState fileEditorState) {
+        textEditorState = fileEditorState;
+    }
+
+
+    @Override
+    public boolean isModified() {
+        return false;
+    }
+
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
+
+    @Override
+    public void selectNotify() {
+
+    }
+
+
+    @Override
+    public void deselectNotify() {
+
+    }
+
+
+    @Override
+    public void addPropertyChangeListener(@NotNull PropertyChangeListener propertyChangeListener) {
+
+    }
+
+
+    @Override
+    public void removePropertyChangeListener(@NotNull PropertyChangeListener propertyChangeListener) {
+
+    }
+
+
+    @Nullable
+    @Override
+    public BackgroundEditorHighlighter getBackgroundHighlighter() {
+        return null;
+    }
+
+
+    @Nullable
+    @Override
+    public FileEditorLocation getCurrentLocation() {
+        return null;
+    }
+
+
+    @Nullable
+    @Override
+    public StructureViewBuilder getStructureViewBuilder() {
+        return null;
+    }
+
+
+    @Override
+    public void dispose() {
+        EditorFactory.getInstance().releaseEditor(editor);
+    }
+
+
+    public void update(BCEVirtualFile BCEVirtualFile) {
+        updateEditor(BCEVirtualFile);
+    }
+
+
+}

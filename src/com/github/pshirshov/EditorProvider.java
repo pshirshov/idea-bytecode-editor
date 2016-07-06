@@ -1,5 +1,6 @@
-package com.github.pshirshov.byteCodeViewer;
+package com.github.pshirshov;
 
+import com.github.pshirshov.util.BCEVirtualFile;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
@@ -16,14 +17,14 @@ public class EditorProvider implements FileEditorProvider {
 
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        return virtualFile instanceof VFile;
+        return virtualFile instanceof BCEVirtualFile;
     }
 
 
     @NotNull
     @Override
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        final VFile asVfile = (VFile) virtualFile;
+        final BCEVirtualFile asVfile = (BCEVirtualFile) virtualFile;
         return new ByteCodeEditor(project, asVfile);
     }
 

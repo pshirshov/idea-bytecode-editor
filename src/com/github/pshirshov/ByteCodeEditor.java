@@ -168,12 +168,12 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
         DocumentUtil.writeInRunUndoTransparentAction(() -> {
             Document fragmentDoc = editor.getDocument();
             fragmentDoc.replaceString(0, fragmentDoc.getTextLength(), bytecode);
-            editor.getCaretModel().moveToOffset(offset);
-            final VisualPosition position = editor.getCaretModel().getVisualPosition();
-            editor.getCaretModel().moveToVisualPosition(new VisualPosition(position.line, 0));
-            editor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
-            editor.getComponent().requestFocus();
         });
+
+        editor.getCaretModel().moveToOffset(offset);
+        final VisualPosition position = editor.getCaretModel().getVisualPosition();
+        editor.getCaretModel().moveToVisualPosition(new VisualPosition(position.line, 0));
+        editor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
     }
 
 
@@ -187,7 +187,7 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
     @Nullable
     @Override
     public JComponent getPreferredFocusedComponent() {
-        return component;
+        return editor.getContentComponent();
     }
 
 

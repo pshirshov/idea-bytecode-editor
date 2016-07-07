@@ -3,24 +3,29 @@ package com.github.pshirshov.conversion.xml;
 import com.github.pshirshov.conversion.AssembleStrategy;
 import com.github.pshirshov.org.objectweb.asm.ClassWriter;
 import com.github.pshirshov.org.objectweb.asm.xml.ASMContentHandler;
+import com.github.pshirshov.util.BCEVirtualFile;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.file.Paths;
 
 public class XmlAssembleStrategy implements AssembleStrategy {
     @Override
-    public void assemble(InputStream assembly, String targetDirectory, String fileName) {
+    public void assemble(BCEVirtualFile file, String targetDirectory) {
+        final InputStream is = new ByteArrayInputStream(file.getContent());
+        final String targetName = file.getPresentableName().replace(".bc.xml", ".class");
+
         final ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         final ASMContentHandler handler = new ASMContentHandler(classWriter);
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
-            final String targetPath = Paths.get(targetDirectory).resolve(fileName).toFile().getCanonicalPath();
+            final String targetPath = Paths.get(targetDirectory).resolve(targetName).toFile().getCanonicalPath();
 
             final SAXParser saxParser = factory.newSAXParser();
-            saxParser.parse(assembly, handler);
+            saxParser.parse(is, handler);
 
             final byte[] bytes = classWriter.toByteArray();
             try (FileOutputStream fos = new FileOutputStream(targetPath)) {

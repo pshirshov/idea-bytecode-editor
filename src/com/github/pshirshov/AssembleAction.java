@@ -7,6 +7,7 @@ import com.github.pshirshov.util.IdeaUtils;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
@@ -14,8 +15,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import kotlin.text.Charsets;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.IOException;
 
 class AssembleAction extends AnAction {
     private static final Logger LOG = Logger.getInstance(ByteCodeEditor.class);
@@ -49,14 +49,20 @@ class AssembleAction extends AnAction {
 
         if (selection != null) {
             final String destDir = selection.getPath();
-
             try {
                 LOG.info("Assembling classfile into " + destDir);
-                final InputStream is = new ByteArrayInputStream(
-                        byteCodeEditor.getText().getBytes(Charsets.UTF_8)
-                );
-                final String targetName = virtualFile.getPresentableName().replace(".bc", ".class");
-                strategy.assemble(is, destDir, targetName);
+                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            virtualFile.setBinaryContent(byteCodeEditor.getText().getBytes(Charsets.UTF_8));
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+
+                strategy.assemble(virtualFile, destDir);
             } catch (Throwable e) {
                 IdeaUtils.showErrorNotification("Assembler failed", e);
             }

@@ -145,7 +145,7 @@ public class ShowByteCodeAction extends AnAction {
 
                 FileEditorManager manager = FileEditorManager.getInstance(project);
 
-                final String filename = '/' + psiClass.getQualifiedName().replace('.', '/') + ".bc";
+                final String filename = '/' + psiClass.getQualifiedName().replace('.', '/') + ".bc.xml";
                 BCEVirtualFile BCEVirtualFile = new BCEVirtualFile(
                         filename
                         , JavaClassFileType.INSTANCE

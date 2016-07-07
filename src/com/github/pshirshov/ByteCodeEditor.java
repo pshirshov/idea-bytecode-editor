@@ -15,7 +15,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.editor.ScrollType;
-import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.VisualPosition;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
 import com.intellij.openapi.editor.impl.EditorFactoryImpl;
@@ -26,8 +26,6 @@ import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
 import com.intellij.openapi.fileTypes.StdFileTypes;
-import com.intellij.openapi.fileTypes.SyntaxHighlighter;
-import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -72,15 +70,16 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
         final Document doc = ((EditorFactoryImpl) factory).createDocument("", true, false);
         doc.setReadOnly(false);
 
-        editor = factory.createEditor(doc, project);
+        editor = factory.createEditor(doc, project, StdFileTypes.XML, false);
+
         final EditorEx editorEx = (EditorEx) editor;
 
         EditorHighlighterFactory editorHighlighterFactory = EditorHighlighterFactory.getInstance();
-        final SyntaxHighlighter syntaxHighlighter = SyntaxHighlighterFactory
-                .getSyntaxHighlighter(StdFileTypes.XML, project, null);
-        editorEx.setHighlighter(editorHighlighterFactory.createEditorHighlighter(syntaxHighlighter,
-                                                                                 EditorColorsManager.getInstance()
-                                                                                                    .getGlobalScheme()));
+//        final SyntaxHighlighter syntaxHighlighter = SyntaxHighlighterFactory
+//                .getSyntaxHighlighter(StdFileTypes.XML, project, null);
+//        editorEx.setHighlighter(editorHighlighterFactory.createEditorHighlighter(syntaxHighlighter,
+//                                                                                 EditorColorsManager.getInstance()
+//                                                                                                    .getGlobalScheme()));
         editorEx.setCaretVisible(true);
         editorEx.setViewer(false);
         editorEx.setInsertMode(true);
@@ -104,23 +103,12 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
 
         this.component = panel;
         this.file = virtualFile;
-        updateEditor(virtualFile);
+        update(virtualFile);
     }
 
 
-    private void updateEditor(BCEVirtualFile virtualFile) {
+    public void update(BCEVirtualFile virtualFile) {
         try {
-            try (
-                    BufferedInputStream bis = new BufferedInputStream(virtualFile.getInputStream());
-                    ByteArrayOutputStream buf = new ByteArrayOutputStream();
-            ) {
-                int result = bis.read();
-                while (result != -1) {
-                    buf.write((byte) result);
-                    result = bis.read();
-                }
-                setText(buf.toString(), virtualFile.getElement());
-            }
             ApplicationManager.getApplication().runWriteAction(new Runnable() {
                 @Override
                 public void run() {
@@ -133,6 +121,17 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
                 }
             });
 
+            try (
+                    BufferedInputStream bis = new BufferedInputStream(virtualFile.getInputStream());
+                    ByteArrayOutputStream buf = new ByteArrayOutputStream();
+            ) {
+                int result = bis.read();
+                while (result != -1) {
+                    buf.write((byte) result);
+                    result = bis.read();
+                }
+                setText(buf.toString(), virtualFile.getElement());
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -141,12 +140,13 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
 
     public void setText(final String bytecode, PsiElement element) {
         int offset = 0;
-        VirtualFile file = PsiUtilCore.getVirtualFile(element);
-        if (file != null) {
-            final Document document = FileDocumentManager.getInstance().getDocument(file);
+
+        VirtualFile sourceFile = PsiUtilCore.getVirtualFile(element);
+        if (sourceFile != null) {
+            final Document document = FileDocumentManager.getInstance().getDocument(sourceFile);
             if (document != null) {
                 int lineNumber = document.getLineNumber(element.getTextOffset());
-                LineNumbersMapping mapping = file.getUserData(LineNumbersMapping.LINE_NUMBERS_MAPPING_KEY);
+                LineNumbersMapping mapping = sourceFile.getUserData(LineNumbersMapping.LINE_NUMBERS_MAPPING_KEY);
                 if (mapping != null) {
                     int mappedLine = mapping.sourceToBytecode(lineNumber);
                     while (mappedLine == -1 && lineNumber < document.getLineCount()) {
@@ -159,6 +159,7 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
                 offset = this.file.getStrategy().getLineOffset(bytecode, document, lineNumber);
             }
         }
+
         setText(bytecode, Math.max(0, offset));
     }
 
@@ -168,9 +169,9 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
             Document fragmentDoc = editor.getDocument();
             fragmentDoc.replaceString(0, fragmentDoc.getTextLength(), bytecode);
             editor.getCaretModel().moveToOffset(offset);
-            editor.getScrollingModel().scrollToCaret(ScrollType.RELATIVE);
-
-            //myEditor.getCaretModel().addCaret(myEditor.getCaretModel().getVisualPosition());
+            final VisualPosition position = editor.getCaretModel().getVisualPosition();
+            editor.getCaretModel().moveToVisualPosition(new VisualPosition(position.line, 0));
+            editor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
             editor.getComponent().requestFocus();
         });
     }
@@ -271,11 +272,4 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
     public void dispose() {
         EditorFactory.getInstance().releaseEditor(editor);
     }
-
-
-    public void update(BCEVirtualFile BCEVirtualFile) {
-        updateEditor(BCEVirtualFile);
-    }
-
-
 }

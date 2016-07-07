@@ -1,7 +1,7 @@
 package com.github.pshirshov.conversion;
 
-import java.io.InputStream;
+import com.github.pshirshov.util.BCEVirtualFile;
 
 public interface AssembleStrategy {
-    void assemble(InputStream assembly, String targetDirectory, String fileName);
+    void assemble(BCEVirtualFile file, String targetDirectory);
 }

@@ -16,6 +16,7 @@ import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.editor.VisualPosition;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
 import com.intellij.openapi.editor.impl.EditorFactoryImpl;
@@ -26,6 +27,8 @@ import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
 import com.intellij.openapi.fileTypes.StdFileTypes;
+import com.intellij.openapi.fileTypes.SyntaxHighlighter;
+import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -70,16 +73,16 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
         final Document doc = ((EditorFactoryImpl) factory).createDocument("", true, false);
         doc.setReadOnly(false);
 
-        editor = factory.createEditor(doc, project, StdFileTypes.XML, false);
+        editor = factory.createEditor(doc, project, StdFileTypes.PLAIN_TEXT, false);
 
         final EditorEx editorEx = (EditorEx) editor;
 
         EditorHighlighterFactory editorHighlighterFactory = EditorHighlighterFactory.getInstance();
-//        final SyntaxHighlighter syntaxHighlighter = SyntaxHighlighterFactory
-//                .getSyntaxHighlighter(StdFileTypes.XML, project, null);
-//        editorEx.setHighlighter(editorHighlighterFactory.createEditorHighlighter(syntaxHighlighter,
-//                                                                                 EditorColorsManager.getInstance()
-//                                                                                                    .getGlobalScheme()));
+        final SyntaxHighlighter syntaxHighlighter = SyntaxHighlighterFactory
+                .getSyntaxHighlighter(StdFileTypes.XML, project, null);
+        editorEx.setHighlighter(editorHighlighterFactory.createEditorHighlighter(syntaxHighlighter,
+                                                                                 EditorColorsManager.getInstance()
+                                                                                                    .getGlobalScheme()));
         editorEx.setCaretVisible(true);
         editorEx.setViewer(false);
         editorEx.setInsertMode(true);

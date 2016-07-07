@@ -16,7 +16,7 @@ public class XmlAssembleStrategy implements AssembleStrategy {
     @Override
     public void assemble(BCEVirtualFile file, String targetDirectory) {
         final InputStream is = new ByteArrayInputStream(file.getContent());
-        final String targetName = file.getPresentableName().replace(".bc.xml", ".class");
+        final String targetName = file.getPresentableName().replace(".bc", ".class");
 
         final ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         final ASMContentHandler handler = new ASMContentHandler(classWriter);

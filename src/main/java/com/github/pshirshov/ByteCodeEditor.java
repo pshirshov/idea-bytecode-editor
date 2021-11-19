@@ -10,21 +10,12 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.EditorFactory;
-import com.intellij.openapi.editor.EditorSettings;
-import com.intellij.openapi.editor.ScrollType;
-import com.intellij.openapi.editor.VisualPosition;
+import com.intellij.openapi.editor.*;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
 import com.intellij.openapi.editor.impl.EditorFactoryImpl;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.FileEditorLocation;
-import com.intellij.openapi.fileEditor.FileEditorState;
-import com.intellij.openapi.fileEditor.FileEditorStateLevel;
+import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
 import com.intellij.openapi.fileTypes.StdFileTypes;
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
@@ -81,8 +72,8 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
         final SyntaxHighlighter syntaxHighlighter = SyntaxHighlighterFactory
                 .getSyntaxHighlighter(StdFileTypes.XML, project, null);
         editorEx.setHighlighter(editorHighlighterFactory.createEditorHighlighter(syntaxHighlighter,
-                                                                                 EditorColorsManager.getInstance()
-                                                                                                    .getGlobalScheme()));
+                EditorColorsManager.getInstance()
+                        .getGlobalScheme()));
         editorEx.setCaretVisible(true);
         editorEx.setViewer(false);
         editorEx.setInsertMode(true);
@@ -102,7 +93,7 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
             actions.add(action);
         }
         panel.add(actionManager.createActionToolbar(ActionPlaces.JAVADOC_TOOLBAR, actions, true).getComponent(),
-                  BorderLayout.NORTH);
+                BorderLayout.NORTH);
 
         this.component = panel;
         this.file = virtualFile;

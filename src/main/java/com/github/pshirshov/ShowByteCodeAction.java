@@ -39,11 +39,7 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiClassOwner;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.SmartPointerManager;
-import com.intellij.psi.SmartPsiElementPointer;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtilCore;
 import org.jetbrains.annotations.NotNull;
 
@@ -95,7 +91,7 @@ public class ShowByteCodeAction extends AnAction {
         }
 
         final SmartPsiElementPointer element = SmartPointerManager.getInstance(project)
-                                                                  .createSmartPsiElementPointer(psiElement);
+                .createSmartPsiElementPointer(psiElement);
 
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Looking for bytecode...") {
             private String myByteCode;
@@ -106,7 +102,7 @@ public class ShowByteCodeAction extends AnAction {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 if (ProjectRootManager.getInstance(project).getFileIndex()
-                                      .isInContent(virtualFile) && isMarkedForCompilation(project, virtualFile)) {
+                        .isInContent(virtualFile) && isMarkedForCompilation(project, virtualFile)) {
                     myErrorMessage = "Unable to show bytecode for '" + psiElementTitle + "'. Class file does not exist or is out-of-date.";
                     myErrorTitle = "Class File Out-Of-Date";
                 } else {
@@ -137,7 +133,7 @@ public class ShowByteCodeAction extends AnAction {
 
                 if (myByteCode == null) {
                     Messages.showErrorDialog(project, "Unable to parse class file for '" + psiElementTitle + "'.",
-                                             "Bytecode not Found");
+                            "Bytecode not Found");
                     return;
                 }
 
@@ -176,7 +172,6 @@ public class ShowByteCodeAction extends AnAction {
         final CompilerManager compilerManager = CompilerManager.getInstance(project);
         return !compilerManager.isUpToDate(compilerManager.createFilesCompileScope(new VirtualFile[]{virtualFile}));
     }
-
 
 
 }

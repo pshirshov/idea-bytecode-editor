@@ -28,20 +28,8 @@ package com.github.pshirshov.conversion.jasmin; /***
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.github.pshirshov.org.objectweb.asm.ClassVisitor;
-import com.github.pshirshov.org.objectweb.asm.Label;
-import com.github.pshirshov.org.objectweb.asm.MethodVisitor;
-import com.github.pshirshov.org.objectweb.asm.Opcodes;
-import com.github.pshirshov.org.objectweb.asm.Type;
-import com.github.pshirshov.org.objectweb.asm.tree.AbstractInsnNode;
-import com.github.pshirshov.org.objectweb.asm.tree.AnnotationNode;
-import com.github.pshirshov.org.objectweb.asm.tree.ClassNode;
-import com.github.pshirshov.org.objectweb.asm.tree.FieldNode;
-import com.github.pshirshov.org.objectweb.asm.tree.InnerClassNode;
-import com.github.pshirshov.org.objectweb.asm.tree.LabelNode;
-import com.github.pshirshov.org.objectweb.asm.tree.LocalVariableNode;
-import com.github.pshirshov.org.objectweb.asm.tree.MethodNode;
-import com.github.pshirshov.org.objectweb.asm.tree.TryCatchBlockNode;
+import com.github.pshirshov.org.objectweb.asm.*;
+import com.github.pshirshov.org.objectweb.asm.tree.*;
 import com.github.pshirshov.org.objectweb.asm.util.Printer;
 
 import java.io.PrintWriter;
@@ -64,16 +52,14 @@ public class JasminifierClassAdapter extends ClassVisitor {
     /**
      * Constructs a new {@link JasminifierClassAdapter}.
      *
-     * @param pw
-     *            the print writer to be used to print the class.
+     * @param pw the print writer to be used to print the class.
      */
     public JasminifierClassAdapter(final PrintWriter pw) {
         super(Opcodes.ASM5, new ClassNode());
         this.pw = pw;
         labelNames = new HashMap<Label, String>();
     }
-    
-    
+
 
     @Override
     public void visitEnd() {
@@ -498,7 +484,7 @@ public class JasminifierClassAdapter extends ClassVisitor {
 
 
     private void printShift() {
-        for (int i = 0; i < shift; ++i){
+        for (int i = 0; i < shift; ++i) {
             pw.print(' ');
         }
     }
@@ -508,7 +494,7 @@ public class JasminifierClassAdapter extends ClassVisitor {
         pw.println();
         doShift = true;
     }
-    
+
 
     protected String access(final int access) {
         StringBuilder b = new StringBuilder();
@@ -678,7 +664,7 @@ public class JasminifierClassAdapter extends ClassVisitor {
             pwprint("[C = ");
             char[] v = (char[]) value;
             for (int i = 0; i < v.length; i++) {
-                pwprint((int)v[i]);
+                pwprint((int) v[i]);
                 pwprint(' ');
             }
             pwprintln();

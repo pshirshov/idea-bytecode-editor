@@ -1,20 +1,14 @@
 package com.github.pshirshov.conversion.xml;
 
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.ProcessingInstruction;
-import org.w3c.dom.Text;
+import org.w3c.dom.*;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 class SaxToDomHandler
-        extends DefaultHandler
-{
+        extends DefaultHandler {
     public SaxToDomHandler(Document doc) {
-        myDoc         = doc;
+        myDoc = doc;
         myCurrentNode = myDoc;
     }
 
@@ -23,11 +17,11 @@ class SaxToDomHandler
         // Create the element.
         Element elem = myDoc.createElementNS(uri, qName);
         // Add each attribute.
-        for ( int i = 0; i < attrs.getLength(); ++i ) {
+        for (int i = 0; i < attrs.getLength(); ++i) {
             String ns_uri = attrs.getURI(i);
-            String qname  = attrs.getQName(i);
-            String value  = attrs.getValue(i);
-            Attr attr   = myDoc.createAttributeNS(ns_uri, qname);
+            String qname = attrs.getQName(i);
+            String value = attrs.getValue(i);
+            Attr attr = myDoc.createAttributeNS(ns_uri, qname);
             attr.setValue(value);
             elem.setAttributeNodeNS(attr);
         }
@@ -43,14 +37,14 @@ class SaxToDomHandler
 
     // Add a new text node in the DOM tree, at the right place.
     public void characters(char[] ch, int start, int length) {
-        String str  = new String(ch, start, length);
+        String str = new String(ch, start, length);
         Text text = myDoc.createTextNode(str);
         myCurrentNode.appendChild(text);
     }
 
     // Add a new text node in the DOM tree, at the right place.
     public void ignorableWhitespace(char[] ch, int start, int length) {
-        String str  = new String(ch, start, length);
+        String str = new String(ch, start, length);
         Text text = myDoc.createTextNode(str);
         myCurrentNode.appendChild(text);
     }

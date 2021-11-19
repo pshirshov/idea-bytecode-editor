@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+    id "org.jetbrains.intellij" version "1.1.4"
+}
+apply plugin: 'idea'
+
+def myPlugins = ['java']
+
+intellij {
+    version.set(idea_version)
+    plugins.set(myPlugins)
+    pluginName.set(plugin_name)
+    updateSinceUntilBuild.set(false)
+}
+
+version plugin_version
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+}
+
+dependencies {
+    implementation group: 'ca.mcgill.sable', name: 'jasmin', version: '3.0.2'
+}

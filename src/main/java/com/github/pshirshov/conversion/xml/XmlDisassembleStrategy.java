@@ -27,8 +27,8 @@ public class XmlDisassembleStrategy implements DisassembleStrategy {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
-            DocumentBuilder        builder = factory.newDocumentBuilder();
-            DOMImplementation impl    = builder.getDOMImplementation();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            DOMImplementation impl = builder.getDOMImplementation();
             Document doc = impl.createDocument(null, null, null);
             SaxToDomHandler handlers = new SaxToDomHandler(doc);
             classReader.accept(new SAXClassAdapter(handlers, true), ClassReader.EXPAND_FRAMES);

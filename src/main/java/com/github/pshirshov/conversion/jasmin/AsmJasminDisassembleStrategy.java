@@ -14,9 +14,9 @@ public class AsmJasminDisassembleStrategy implements DisassembleStrategy {
         final ClassReader classReader = new ClassReader(classfile);
         final StringWriter writer = new StringWriter();
 
-        try(final PrintWriter printWriter = new PrintWriter(writer)) {
-                int flags = ClassReader.EXPAND_FRAMES;
-                classReader.accept(new JasminifierClassAdapter(printWriter), flags);
+        try (final PrintWriter printWriter = new PrintWriter(writer)) {
+            int flags = ClassReader.EXPAND_FRAMES;
+            classReader.accept(new JasminifierClassAdapter(printWriter), flags);
         }
 
         return writer.toString();

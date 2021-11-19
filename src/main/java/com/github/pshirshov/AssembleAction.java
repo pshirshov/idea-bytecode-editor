@@ -35,7 +35,7 @@ class AssembleAction extends AnAction {
     @Override
     public void update(AnActionEvent e) {
         e.getPresentation().setVisible(true);
-        e.getPresentation().setIcon(AllIcons.Actions.Export);
+        e.getPresentation().setIcon(AllIcons.ToolbarDecorator.Export);
         e.getPresentation().setDescription("Compile into class file");
     }
 

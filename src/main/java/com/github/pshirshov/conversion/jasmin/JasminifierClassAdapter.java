@@ -28,9 +28,9 @@ package com.github.pshirshov.conversion.jasmin; /***
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.github.pshirshov.org.objectweb.asm.*;
-import com.github.pshirshov.org.objectweb.asm.tree.*;
-import com.github.pshirshov.org.objectweb.asm.util.Printer;
+import org.objectweb.asm.*;
+import org.objectweb.asm.tree.*;
+import org.objectweb.asm.util.Printer;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -81,8 +81,9 @@ public class JasminifierClassAdapter extends ClassVisitor {
         for (int i = 0; i < cn.interfaces.size(); ++i) {
             println(".implements ", cn.interfaces.get(i).toString());
         }
-        if (cn.signature != null)
+        if (cn.signature != null) {
             println(".signature ", '"' + cn.signature + '"');
+        }
         if (cn.outerClass != null) {
             pwprint(".enclosing method ");
             pwprint(cn.outerClass);
@@ -145,7 +146,7 @@ public class JasminifierClassAdapter extends ClassVisitor {
                 pwprint("\"");
             }
             if (fn.value instanceof String) {
-                StringBuffer buf = new StringBuffer();
+                StringBuilder buf = new StringBuilder();
                 Printer.appendString(buf, (String) fn.value);
                 pwprint(" = ");
                 pwprint(buf.toString());
@@ -555,7 +556,7 @@ public class JasminifierClassAdapter extends ClassVisitor {
 
     protected void print(final Object cst) {
         if (cst instanceof String) {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             Printer.appendString(buf, (String) cst);
             pwprint(buf.toString());
         } else if (cst instanceof Float) {

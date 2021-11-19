@@ -13,6 +13,7 @@ class SaxToDomHandler
     }
 
     // Add it in the DOM tree, at the right place.
+    @Override
     public void startElement(String uri, String name, String qName, Attributes attrs) {
         // Create the element.
         Element elem = myDoc.createElementNS(uri, qName);
@@ -31,11 +32,13 @@ class SaxToDomHandler
     }
 
     // Adjust the current place for subsequent additions.
+    @Override
     public void endElement(String uri, String name, String qName) {
         myCurrentNode = myCurrentNode.getParentNode();
     }
 
     // Add a new text node in the DOM tree, at the right place.
+    @Override
     public void characters(char[] ch, int start, int length) {
         String str = new String(ch, start, length);
         Text text = myDoc.createTextNode(str);
@@ -43,6 +46,7 @@ class SaxToDomHandler
     }
 
     // Add a new text node in the DOM tree, at the right place.
+    @Override
     public void ignorableWhitespace(char[] ch, int start, int length) {
         String str = new String(ch, start, length);
         Text text = myDoc.createTextNode(str);
@@ -50,20 +54,24 @@ class SaxToDomHandler
     }
 
     // Add a new text PI in the DOM tree, at the right place.
+    @Override
     public void processingInstruction(String target, String data) {
         ProcessingInstruction pi = myDoc.createProcessingInstruction(target, data);
         myCurrentNode.appendChild(pi);
     }
 
     // For the handlers below, use your usual logging facilities.
+    @Override
     public void error(SAXParseException e) {
         throw new RuntimeException(e);
     }
 
+    @Override
     public void fatalError(SAXParseException e) {
         throw new RuntimeException(e);
     }
 
+    @Override
     public void warning(SAXParseException e) {
 
     }

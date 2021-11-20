@@ -142,7 +142,7 @@ public class ShowByteCodeAction extends AnAction {
                 FileEditorManager manager = FileEditorManager.getInstance(project);
 
                 final String filename = '/' + psiClass.getQualifiedName().replace('.', '/') + ".bc";
-                BCEVirtualFile BCEVirtualFile = new BCEVirtualFile(
+                BCEVirtualFile bceVirtualFile = new BCEVirtualFile(
                         filename
                         , JavaClassFileType.INSTANCE
                         , myByteCode.getBytes()
@@ -153,15 +153,15 @@ public class ShowByteCodeAction extends AnAction {
                 for (FileEditor fileEditor : FileEditorManager.getInstance(project).getAllEditors()) {
                     if (fileEditor instanceof ByteCodeEditor) {
                         final ByteCodeEditor asBce = (ByteCodeEditor) fileEditor;
-                        if (asBce.getFile().getPath().equals(BCEVirtualFile.getPath())) {
+                        if (asBce.getFile().getPath().equals(bceVirtualFile.getPath())) {
                             FileEditorManager.getInstance(project).openFile(asBce.getFile(), true, true);
-                            asBce.update(BCEVirtualFile);
+                            asBce.update(bceVirtualFile);
                             return;
                         }
                     }
                 }
 
-                manager.openFile(BCEVirtualFile, true, true);
+                manager.openFile(bceVirtualFile, true, true);
 
             }
         });

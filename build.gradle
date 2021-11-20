@@ -24,7 +24,7 @@ repositories {
     gradlePluginPortal()
 }
 
-def myPlugins = ['java']
+def myPlugins = ['java','ByteCodeViewer']
 
 intellij {
     version.set(idea_version)

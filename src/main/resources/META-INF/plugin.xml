@@ -1,7 +1,11 @@
-<idea-plugin version="2">
-    <name>Bytecode Editor</name>
-    <id>com.github.pshirshov.bytecodeeditor</id>
-    <version>0.2.0</version>
+<idea-plugin>
+    <id>com.github.pshirshov.bytecodeeditor.xenoamess</id>
+    <name>Bytecode Editor(XenoAmess TPM)</name>
+    <version>0.3.0</version>
+    <vendor
+            email="xenoamess@gmail.com"
+            url="https://github.com/XenoAmess"
+    >XenoAmess</vendor>
     <description>
         <![CDATA[
         <p>Provides <i>View | Edit Bytecode</i> action for those who learns JVM internals.</p>
@@ -40,8 +44,7 @@
             <li><em>0.1.3</em>: Replaced outdated Jasper disassembler with ASM 6</li>
         </ul>
     ]]></change-notes>
-    <vendor>com.github.pshirshov</vendor>
-    <idea-version since-build="141.0"/>
+    <idea-version since-build="181.5540.23"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceInterface="com.github.pshirshov.conversion.BytecodeConverter"

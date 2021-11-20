@@ -1,8 +1,8 @@
 package com.github.pshirshov.conversion.xml;
 
 import com.github.pshirshov.conversion.AssembleStrategy;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.xml.ASMContentHandler;
+import com.github.pshirshov.org.objectweb.asm.ClassWriter;
+import com.github.pshirshov.org.objectweb.asm.xml.ASMContentHandler;
 import com.github.pshirshov.util.BCEVirtualFile;
 
 import javax.xml.parsers.SAXParser;

@@ -2,7 +2,27 @@ plugins {
     id 'java'
     id "org.jetbrains.intellij" version "1.1.4"
 }
+
 apply plugin: 'idea'
+
+dependencies {
+    implementation fileTree(dir:'lib',include:['*.jar'])
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
+    maven {
+        url 'https://dl.bintray.com/jetbrains/intellij-plugin-service'
+    }
+    gradlePluginPortal()
+}
 
 def myPlugins = ['java']
 
@@ -14,14 +34,6 @@ intellij {
 }
 
 version plugin_version
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-        url "https://oss.sonatype.org/content/repositories/snapshots/"
-    }
-}
 
 dependencies {
     implementation group: 'ca.mcgill.sable', name: 'jasmin', version: '3.0.2'

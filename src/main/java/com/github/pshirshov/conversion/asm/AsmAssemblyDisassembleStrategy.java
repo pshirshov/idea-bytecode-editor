@@ -1,9 +1,9 @@
 package com.github.pshirshov.conversion.asm;
 
 import com.github.pshirshov.conversion.DisassembleStrategy;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.util.Textifier;
-import org.objectweb.asm.util.TraceClassVisitor;
+import com.github.pshirshov.org.objectweb.asm.ClassReader;
+import com.github.pshirshov.org.objectweb.asm.util.Textifier;
+import com.github.pshirshov.org.objectweb.asm.util.TraceClassVisitor;
 import com.github.pshirshov.util.IdeaUtils;
 import com.intellij.openapi.editor.Document;
 

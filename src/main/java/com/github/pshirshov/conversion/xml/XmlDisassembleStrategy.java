@@ -1,8 +1,8 @@
 package com.github.pshirshov.conversion.xml;
 
 import com.github.pshirshov.conversion.DisassembleStrategy;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.xml.SAXClassAdapter;
+import com.github.pshirshov.org.objectweb.asm.ClassReader;
+import com.github.pshirshov.org.objectweb.asm.xml.SAXClassAdapter;
 import com.github.pshirshov.util.IdeaUtils;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;

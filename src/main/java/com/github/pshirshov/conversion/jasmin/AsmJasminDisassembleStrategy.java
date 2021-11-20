@@ -1,9 +1,9 @@
 package com.github.pshirshov.conversion.jasmin;
 
 import com.github.pshirshov.conversion.DisassembleStrategy;
+import com.github.pshirshov.org.objectweb.asm.ClassReader;
 import com.github.pshirshov.util.IdeaUtils;
 import com.intellij.openapi.editor.Document;
-import org.objectweb.asm.ClassReader;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

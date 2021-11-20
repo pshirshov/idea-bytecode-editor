@@ -50,6 +50,7 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
     }
 
 
+    @Override
     public BCEVirtualFile getFile() {
         return file;
     }

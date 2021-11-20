@@ -13,6 +13,7 @@ public class JasminAssembleStrategy implements AssembleStrategy {
         try (
                 InputStream inputStream = new ByteArrayInputStream(file.getContent());
         ) {
+            // TODO shit logic
             final String targetFileName = file.getPresentableName().replace(
                     ".bc",
                     ".class"

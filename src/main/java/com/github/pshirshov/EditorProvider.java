@@ -13,7 +13,6 @@ import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
 public class EditorProvider implements FileEditorProvider {
-    private static final Logger LOG = Logger.getInstance(EditorProvider.class);
 
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile virtualFile) {

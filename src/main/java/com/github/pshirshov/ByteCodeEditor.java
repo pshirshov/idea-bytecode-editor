@@ -37,7 +37,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
-    private static final Logger LOG = Logger.getInstance(ByteCodeEditor.class);
 
     private final JPanel component;
     private FileEditorState textEditorState = new TextEditorState();
@@ -133,7 +132,10 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
     }
 
 
-    public void setText(final String bytecode, PsiElement element) {
+    private void setText(
+            @NotNull final String bytecodeXmlString,
+            PsiElement element
+    ) {
         int offset = 0;
 
         VirtualFile sourceFile = PsiUtilCore.getVirtualFile(element);
@@ -151,18 +153,18 @@ public class ByteCodeEditor extends UserDataHolderBase implements FileEditor {
                         lineNumber = mappedLine;
                     }
                 }
-                offset = this.file.getStrategy().getLineOffset(bytecode, document, lineNumber);
+                offset = this.file.getStrategy().getLineOffset(bytecodeXmlString, document, lineNumber);
             }
         }
 
-        setText(bytecode, Math.max(0, offset));
+        setText(bytecodeXmlString, Math.max(0, offset));
     }
 
 
-    private void setText(final String bytecode, final int offset) {
+    private void setText(final String bytecodeXmlString, final int offset) {
         DocumentUtil.writeInRunUndoTransparentAction(() -> {
             Document fragmentDoc = editor.getDocument();
-            fragmentDoc.replaceString(0, fragmentDoc.getTextLength(), bytecode);
+            fragmentDoc.replaceString(0, fragmentDoc.getTextLength(), bytecodeXmlString);
         });
 
         editor.getCaretModel().moveToOffset(offset);

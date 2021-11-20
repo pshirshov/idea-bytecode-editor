@@ -18,7 +18,7 @@ import kotlin.text.Charsets;
 import java.io.IOException;
 
 class AssembleAction extends AnAction {
-    private static final Logger LOG = Logger.getInstance(ByteCodeEditor.class);
+    private static final Logger LOG = Logger.getInstance(AssembleAction.class);
 
     private ByteCodeEditor byteCodeEditor;
     private final Project project;

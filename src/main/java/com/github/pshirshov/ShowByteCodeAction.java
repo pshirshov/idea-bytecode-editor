@@ -48,7 +48,6 @@ import org.jetbrains.annotations.NotNull;
  * @since 5/4/12
  */
 public class ShowByteCodeAction extends AnAction {
-    private static final Logger LOG = Logger.getInstance(ShowByteCodeAction.class);
     private final XmlDisassembleStrategy disassembleStrategy = new XmlDisassembleStrategy();
 
 

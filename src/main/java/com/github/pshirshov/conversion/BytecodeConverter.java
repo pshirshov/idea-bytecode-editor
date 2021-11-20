@@ -17,6 +17,7 @@ package com.github.pshirshov.conversion;
 
 import com.github.pshirshov.util.IdeaUtils;
 import com.github.pshirshov.util.PsiUtils;
+import com.intellij.ide.highlighter.JavaClassFileType;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
@@ -51,6 +52,28 @@ public class BytecodeConverter {
         this.strategy = strategy;
     }
 
+    @Nullable
+    private String tryGetByteCodeNew(@NotNull PsiFile containingFile) {
+        VirtualFile virtualFile = containingFile.getVirtualFile();
+        if (
+                virtualFile == null
+                        ||
+                        !(containingFile.getFileType() instanceof JavaClassFileType)
+        ) {
+            PsiFile originalContainingFile = containingFile.getOriginalFile();
+            if (containingFile == originalContainingFile) {
+                return null;
+            }
+            return tryGetByteCodeNew(originalContainingFile);
+        }
+        String res = null;
+        try {
+            res = processClassFile(virtualFile.contentsToByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
 
     @Nullable
     public String getByteCode(@NotNull PsiElement psiElement) {
@@ -58,6 +81,11 @@ public class BytecodeConverter {
         //todo show popup
         if (containingClass == null) {
             return null;
+        }
+        final PsiFile containingFile = containingClass.getContainingFile();
+        String tryGetByteCodeNewRes = tryGetByteCodeNew(containingFile);
+        if (tryGetByteCodeNewRes != null) {
+            return tryGetByteCodeNewRes;
         }
         final String classVMName = PsiUtils.getClassVMName(containingClass);
         if (classVMName == null) {
@@ -95,17 +123,21 @@ public class BytecodeConverter {
         }
 
         try {
-            final PsiFile containingFile = containingClass.getContainingFile();
-            final VirtualFile virtualFile = containingFile.getVirtualFile();
-            if (virtualFile == null) {
-                return null;
+            PsiFile realUsePsiFile = containingFile;
+            VirtualFile realUseVirtualFile = realUsePsiFile.getVirtualFile();
+            if (realUseVirtualFile == null) {
+                realUsePsiFile = containingFile.getOriginalFile();
+                realUseVirtualFile = realUsePsiFile.getVirtualFile();
+                if (realUseVirtualFile == null) {
+                    return null;
+                }
             }
             final CompilerModuleExtension moduleExtension = CompilerModuleExtension.getInstance(module);
             if (moduleExtension == null) {
                 return null;
             }
             String classPath;
-            if (ProjectRootManager.getInstance(module.getProject()).getFileIndex().isInTestSourceContent(virtualFile)) {
+            if (ProjectRootManager.getInstance(module.getProject()).getFileIndex().isInTestSourceContent(realUseVirtualFile)) {
                 final VirtualFile pathForTests = moduleExtension.getCompilerOutputPathForTests();
                 if (pathForTests == null) {
                     return null;
